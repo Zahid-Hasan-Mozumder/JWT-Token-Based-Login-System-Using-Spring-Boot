@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the dashboard <span th:text="${username}"></span></h1>
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        function checkAuthentication() {
+            const token = localStorage.getItem('jwtToken');
+            console.log(token);
+            if (!token) {
+                window.location.href = '/login'; // Redirect to login if no token found
+            }
+        }
+
+        async function loadDashboard() {
+            const token = localStorage.getItem('jwtToken');
+            const response = await fetch('/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                console.log("Dashboard data : " + data);
+                document.getElementById('dashboard-content').innerHTML = data;
+            }
+            else {
+                alert('Failed to load dashboard. Redirecting to login.');
+                localStorage.removeItem('jwtToken'); // Clear token if invalid
+                window.location.href = '/login';
+            }
+        }
+
+        window.onload = function() {
+            checkAuthentication();
+            loadDashboard();
+        };
+    </script>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>
